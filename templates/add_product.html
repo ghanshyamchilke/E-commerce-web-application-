@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="form-container">
+    <h2>Add New Product</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="Product Name" required>
+        
+        <textarea name="description" placeholder="Product Description" required></textarea>
+        
+        <input type="number" step="0.01" name="price" placeholder="Price" required>
+        
+        <input type="number" name="stock" placeholder="Stock Quantity" required>
+        
+        <input type="file" name="image" accept="image/*" required>
+        
+        <button type="submit">Add Product</button>
+        <label>Image Width (px)</label>
+<input type="number" name="image_width" value="250">
+
+<label>Image Height (px)</label>
+<input type="number" name="image_height" value="250">
+
+<label>Card Size</label>
+<select name="card_size">
+    <option value="small">Small</option>
+    <option value="medium" selected>Medium</option>
+    <option value="large">Large</option>
+</select>
+    </form>
+</div>
+
+{% endblock %}
