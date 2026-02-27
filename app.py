@@ -14,9 +14,6 @@ app.config["UPLOAD_FOLDER"] = "/tmp/uploads"
 
 db = SQLAlchemy(app)
 
-# Ensure upload folder exists
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-
 # ------------------ MODELS ------------------
 
 class User(db.Model):
@@ -43,11 +40,10 @@ class Cart(db.Model):
     product_id = db.Column(db.Integer)
     quantity = db.Column(db.Integer)
 
-# ------------------ CREATE TABLES ------------------
-
-with app.app_context():
+# 🔥 THIS IS THE IMPORTANT PART
+@app.before_first_request
+def create_tables():
     db.create_all()
-
 # ------------------ ROUTES ------------------
 
 @app.route("/")
