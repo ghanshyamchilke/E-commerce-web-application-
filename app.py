@@ -1,34 +1,21 @@
 import os
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+from flask import Flask, render_template, request, redirect, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-# ------------------ APP CONFIG ------------------
-
-app = Flask(__name__, static_folder='static', template_folder='templates')
-
+app = Flask(__name__, static_folder="static", template_folder="templates")
 app.secret_key = "supersecretkey"
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+# ✅ Use /tmp for SQLite on Render
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/ecommerce.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["UPLOAD_FOLDER"] = "/tmp/uploads"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'ecommerce.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'static/uploads')
-
-
-db.init_app(app)
-
-# Import models AFTER db init
-from models import Product, User
-
-with app.app_context():
-    db.create_all()
-
-
+db = SQLAlchemy(app)
 
 # Ensure upload folder exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # ------------------ MODELS ------------------
 
@@ -46,11 +33,9 @@ class Product(db.Model):
     price = db.Column(db.Float)
     image = db.Column(db.String(200))
     stock = db.Column(db.Integer)
-
-    # NEW FIELDS
     image_width = db.Column(db.Integer, default=250)
     image_height = db.Column(db.Integer, default=250)
-    card_size = db.Column(db.String(20), default="medium")  # small / medium / large
+    card_size = db.Column(db.String(20), default="medium")
 
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -58,12 +43,19 @@ class Cart(db.Model):
     product_id = db.Column(db.Integer)
     quantity = db.Column(db.Integer)
 
+# ------------------ CREATE TABLES ------------------
+
+with app.app_context():
+    db.create_all()
+
 # ------------------ ROUTES ------------------
 
-@app.route('/')
+@app.route("/")
 def index():
     products = Product.query.all()
-    return render_template('index.html', products=products)
+    return render_template("index.html", products=products)
+
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -254,11 +246,3 @@ def create_admin():
         print("ℹ Admin already exists.")
 
 
-# ------------------ RUN APP ------------------
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        create_admin()   # 👈 ADD THIS LINE
-    app.run(debug=True)
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
