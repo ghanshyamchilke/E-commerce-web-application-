@@ -16,12 +16,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'e
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'static/uploads')
 
-db = SQLAlchemy(app)
 
-from models import *
+db.init_app(app)
+
+# Import models AFTER db init
+from models import Product, User
 
 with app.app_context():
     db.create_all()
+
 
 
 # Ensure upload folder exists
